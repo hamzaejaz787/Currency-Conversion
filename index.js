@@ -10,6 +10,16 @@ const restCountriesApi = "https://restcountries.com/v2/currency";
 const fixerApiKey = process.env.FIXER_API_KEY;
 const fixerApi = `http://data.fixer.io/api/latest?access_key=${fixerApiKey}`;
 
+//Fetch country name from REST API
+const getCountries = async (currencyCode) => {
+  try {
+    const { data } = await axios.get(`${restCountriesApi}/${currencyCode}`);
+    return data.map(({ name }) => name);
+  } catch (error) {
+    throw new Error(`Unable to get countries that use ${currencyCode}`);
+  }
+};
+
 //Get exchange rate from Fixer Api
 const getExchangeRate = async (fromCurrency, toCurrency) => {
   try {
@@ -25,16 +35,6 @@ const getExchangeRate = async (fromCurrency, toCurrency) => {
   }
 };
 
-//Fetch data about countries
-const getCountries = async (currencyCode) => {
-  try {
-    const { data } = await axios.get(`${restCountriesApi}/${currencyCode}`);
-    return data.map(({ name }) => name);
-  } catch (error) {
-    throw new Error(`Unable to get countries that use ${currencyCode}`);
-  }
-};
-
 //Convert currency
 const convertCurrency = async (fromCurrency, toCurrency, amount) => {
   fromCurrency = fromCurrency.toUpperCase();
@@ -46,13 +46,13 @@ const convertCurrency = async (fromCurrency, toCurrency, amount) => {
 
   const convertedAmount = (amount * exchangeRate).toFixed(2);
 
-  return `${amount} ${fromCurrency} is worth ${convertedAmount} ${toCurrency}.`;
+  return `${amount} ${fromCurrency} is worth ${convertedAmount} ${toCurrency}. You can use it in the following countries: ${countries}`;
 };
 
-convertCurrency("ffg", "pkr", 1)
+convertCurrency("usd", "pkr", 1)
   .then((result) => {
     console.log(result);
   })
   .catch((error) => {
-    console.log(error);
+    console.log(error.message);
   });
